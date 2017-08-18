@@ -1,6 +1,7 @@
 package sparkinterface;
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.linalg.Vectors;
+import org.apache.spark.mllib.regression.LabeledPoint;
 import org.apache.spark.mllib.regression.StreamingLinearRegressionWithSGD;
 
 public class VectorClojure {
@@ -20,5 +21,10 @@ public class VectorClojure {
             .setNumIterations(num)
             .setInitialWeights(Vectors.dense(args));
         return model;
+    }
+
+    public static LabeledPoint labeledPoint(double label, double [] args) {
+        LabeledPoint point = new LabeledPoint(label, Vectors.dense(args));
+        return point;
     }
 }
