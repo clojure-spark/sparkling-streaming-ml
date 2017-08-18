@@ -52,6 +52,17 @@
     (.awaitTermination ssc)))
 
 ```
+* `*SGD`是在线学习模型算法: 贝叶斯SGD, *分类算法SGD
+```java
+    public static StreamingLinearRegressionWithSGD linearRegressionodel(double [] args, int num, float size) {
+        StreamingLinearRegressionWithSGD model = new StreamingLinearRegressionWithSGD()
+            .setStepSize(size)
+            .setNumIterations(num)
+            .setInitialWeights(Vectors.dense(args));
+        return model;
+    }
+
+```
 --------------------------------
 ```clojure
 (defproject sparkling-16-ml "0.1.0-SNAPSHOT"
