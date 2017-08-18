@@ -28,7 +28,7 @@
 (def ssc (JavaStreamingContext. "local[*]" "First Streaming App" (duration 10000)))
 ;; *SGD 在线学习模型: 
 (def model (VectorClojure/linearRegressionodel (double-array (repeat 100 0.0)) 1 0.01))
-;; Scala的socket数据流: 
+;; Scala的socket数据流: 通过R数据可视化来分析, 了解哪一个算法才能解决问题, 利用已有包几行代码, 针对数据建预测模型
 (def stream (.socketTextStream ssc "localhost" 9999))
 ;; 事件化数据流: 如果是多种不同的事件流,那么需要多模型同时训练, 共用一个总的事件(如JSON数据)格式化数据流, 然后根据不同的标签, 分发到不同的模型上面训练和实时预测结果
 (def labeled-stream
