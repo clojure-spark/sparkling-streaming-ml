@@ -52,7 +52,7 @@
     (.awaitTermination ssc)))
 
 ```
-* `*SGD`是在线学习模型算法: 贝叶斯SGD, *分类算法SGD
+* `*SGD`是在线学习模型算法: StreamingLinearRegressionWithSGD线性回归SGD, 贝叶斯SGD, *分类算法SGD
 ```java
     public static StreamingLinearRegressionWithSGD linearRegressionodel(double [] args, int num, float size) {
         StreamingLinearRegressionWithSGD model = new StreamingLinearRegressionWithSGD()
