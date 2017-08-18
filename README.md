@@ -1,4 +1,4 @@
-## sparkling-16-ml (Sparkling 1.2.3 + Spark 2.10 ~ 1.6.0 => 可以很好支持Spark1.6.0)
+## sparkling-16-ml (Sparkling 1.2.3 + Spark 2.10 ~ 1.6.0 => 可以很好支持Spark1.6.0, 因为Spark最新版2.2.0对Java的支持不友好)
 
 ```clojure
 (defproject sparkling-16-ml "0.1.0-SNAPSHOT"
