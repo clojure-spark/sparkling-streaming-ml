@@ -30,7 +30,7 @@
 (def model (VectorClojure/linearRegressionodel (double-array (repeat 100 0.0)) 1 0.01))
 ;; Scala的socket数据流: 
 (def stream (.socketTextStream ssc "localhost" 9999))
-
+;; 事件化数据流: 如果是多种不同的事件流,那么需要多模型同时训练, 共用一个总的事件(如JSON数据)格式化数据流, 然后根据不同的标签, 分发到不同的模型上面训练和实时预测结果
 (def labeled-stream
   (spark/map
    (fn [record]
@@ -42,7 +42,7 @@
 (defn -main
   [& args]
   (do
-    ;; 训练模型: model模型 + 数据流事件化标签化(已标记的数据流)
+    ;; 训练模型: model模型 + 数据流事件化标签化(已标记的数据流) => 如果多模型同时训练和预测结果?
     (.trainOn model labeled-stream)
     ;; 预测模型结果: model模型 + labeled-stream的map-to-pair事件流
     (.print
