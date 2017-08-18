@@ -3,4 +3,11 @@
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojure "1.8.0"]])
+  :dependencies [[org.clojure/clojure "1.8.0"]
+                 [gorillalabs/sparkling "2.1.2"]
+                 [org.apache.spark/spark-mllib_2.10 "1.6.0"]]
+  ;;:aot [#".*" sparkling.serialization sparkling.destructuring]
+  :main sparkling-16-ml.core
+  :profiles {:provided {:dependencies [[org.apache.spark/spark-core_2.10 "1.6.0"]]}
+             :dev {:plugins [[lein-dotenv "RELEASE"]]}}
+  :java-source-paths ["src/java"])
