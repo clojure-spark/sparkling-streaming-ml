@@ -26,7 +26,9 @@
   (.foreachRDD dstream (function2 f)))
 
 (def ssc (JavaStreamingContext. "local[*]" "First Streaming App" (duration 10000)))
+;; *SGD 在线学习模型: 
 (def model (VectorClojure/linearRegressionodel (double-array (repeat 100 0.0)) 1 0.01))
+;; Scala的socket数据流: 
 (def stream (.socketTextStream ssc "localhost" 9999))
 
 (def labeled-stream
@@ -40,7 +42,9 @@
 (defn -main
   [& args]
   (do
+    ;; 训练模型: model模型 + 数据流事件化标签化(已标记的数据流)
     (.trainOn model labeled-stream)
+    ;; 预测模型结果: model模型 + labeled-stream的map-to-pair事件流
     (.print
      (.predictOnValues
       model
