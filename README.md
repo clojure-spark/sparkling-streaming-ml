@@ -117,7 +117,7 @@
     (.awaitTermination ssc)))
 ```
 * StreamingModelProducer正态分布随机模拟数据源
-![](./datas_hist.png)
+![](./datas_hist.png =50x50)
 ```scala
 object StreamingModelProducer {
   import breeze.linalg._
