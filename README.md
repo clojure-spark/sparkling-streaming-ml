@@ -67,6 +67,13 @@
     }
 
 ```
+* `LabeledPoint` 打Label,给特征数据,方便从事件流中取出数据给模型预测: `(spark/tuple (.label lp) (.features lp))`
+```java
+    public static LabeledPoint labeledPoint(double label, double [] args) {
+        LabeledPoint point = new LabeledPoint(label, Vectors.dense(args));
+        return point;
+    }
+```
 --------------------------------
 ```clojure
 (defproject sparkling-16-ml "0.1.0-SNAPSHOT"
