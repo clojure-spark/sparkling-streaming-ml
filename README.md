@@ -116,7 +116,8 @@
     (.start ssc)
     (.awaitTermination ssc)))
 ```
-* StreamingModelProducer
+* StreamingModelProducer正态分布随机模拟数据源
+![](./datas_hist.png)
 ```scala
 object StreamingModelProducer {
   import breeze.linalg._
@@ -269,6 +270,11 @@ object SimpleStreamingModel {
   }
 }
 
+```
+* 查看打印不出来的log, 在repl时: 
+```clojure
+(def atom-log (atom (list)))
+(swap! atom-log conj {:y y :features features})
 ```
 ### License
 
