@@ -6,20 +6,10 @@
    [sparkling.core :as spark]
    [sparkling.api :as api]
    [flambo.api :as fapi]
-   ;;[sparkling.function :refer [function2 function]]
-   [sparkling.function :refer [flat-map-function
-                               flat-map-function2
-                               function
-                               function2
-                               function3
-                               pair-function
-                               pair-flat-map-function
-                               void-function]]
-   ;;
+   [sparkling.function :refer [function2]]
    [sparkling.scalaInterop :as scala]
    [clojure.tools.logging :as log])
   (:import
-   (java.io ObjectInputStream ByteArrayInputStream ObjectOutputStream ByteArrayOutputStream)
    (org.apache.spark.api.java JavaRDD)
    (sparkinterface VectorClojure)
    (org.apache.spark.mllib.linalg Vectors)
@@ -32,32 +22,8 @@
    (java.util Collections)
    (java.util HashMap)))
 
-(defn- serialize
-  "Serializes a single object, returning a byte array."
-  [v]
-  (with-open [bout (ByteArrayOutputStream.)
-              oos (ObjectOutputStream. bout)]
-    (.writeObject oos v)
-    (.flush oos)
-    (.toByteArray bout)))
-
-(defn- deserialize
-  "Deserializes and returns a single object from the given byte array."
-  [bytes]
-  (with-open [ois (-> bytes ByteArrayInputStream. ObjectInputStream.)]
-    (.readObject ois)))
-
-#_(defmacro szfn
-  [& body]
-  `(sfn/fn ~@body))
-
 (defn foreach-rdd [dstream f]
   (.foreachRDD dstream (function2 f)))
-
-(defn foreach
-  "Applies the function `f` to all elements of `rdd`."
-  [rdd f]
-  (.foreach rdd (void-function f)))
 
 (defn -main
   [& args]
@@ -74,15 +40,8 @@
        stream
        (fn [rdd arg2]
          (log/info (str "=====" rdd "=====" arg2))
-   ;;;;;;;;
-         #_(foreach
-          rdd
-          (sfn/fn [x]
-            (log/info (str "*********" x "*****" ))))
-       (fapi/foreach
-        rdd (fapi/fn [x]
-              (log/info (str "*********" x "*****" ))))
-   ;;;;;;;
-         ))
+         (fapi/foreach
+          rdd (fapi/fn [x]
+                (log/info (str "*********" x "*****" ))))))
       (.start streaming-context)
       (.awaitTermination streaming-context))))
