@@ -18,6 +18,7 @@
    [sparkling.scalaInterop :as scala]
    [clojure.tools.logging :as log])
   (:import
+   (java.io ObjectInputStream ByteArrayInputStream ObjectOutputStream ByteArrayOutputStream)
    (org.apache.spark.api.java JavaRDD)
    (sparkinterface VectorClojure)
    (org.apache.spark.mllib.linalg Vectors)
@@ -30,38 +31,54 @@
    (java.util Collections)
    (java.util HashMap)))
 
-(defmacro szfn
+(defn- serialize
+  "Serializes a single object, returning a byte array."
+  [v]
+  (with-open [bout (ByteArrayOutputStream.)
+              oos (ObjectOutputStream. bout)]
+    (.writeObject oos v)
+    (.flush oos)
+    (.toByteArray bout)))
+
+(defn- deserialize
+  "Deserializes and returns a single object from the given byte array."
+  [bytes]
+  (with-open [ois (-> bytes ByteArrayInputStream. ObjectInputStream.)]
+    (.readObject ois)))
+
+#_(defmacro szfn
   [& body]
   `(sfn/fn ~@body))
 
 (defn foreach-rdd [dstream f]
   (.foreachRDD dstream (function2 f)))
 
-(def c (-> (conf/spark-conf)
-           (conf/master "local[*]")
-           (conf/app-name "Consumer")))
-(def context (JavaSparkContext. c))
-(def streaming-context (JavaStreamingContext. context (Duration. 1000)))
-(def parameters (HashMap. {"metadata.broker.list" "127.0.0.1:9092"}))
-(def topics (Collections/singleton "w4u_messages"))
-(def stream (KafkaUtils/createDirectStream streaming-context String String StringDecoder StringDecoder parameters topics))
-
 (defn foreach
   "Applies the function `f` to all elements of `rdd`."
   [rdd f]
   (.foreach rdd (void-function f)))
 
-(foreach-rdd
- stream
- (fn [rdd arg2]
-   (log/info (str "=====" rdd "=====" arg2))
+(defn -main
+  [& args]
+  (let [c (-> (conf/spark-conf)
+              (conf/master "local[*]")
+              (conf/app-name "Consumer"))
+        context (JavaSparkContext. c)
+        streaming-context (JavaStreamingContext. context (Duration. 1000))
+        parameters (HashMap. {"metadata.broker.list" "127.0.0.1:9092"})
+        topics (Collections/singleton "w4u_messages")
+        stream (KafkaUtils/createDirectStream streaming-context String String StringDecoder StringDecoder parameters topics)]
+    (do
+      (foreach-rdd
+       stream
+       (fn [rdd arg2]
+         (log/info (str "=====" rdd "=====" arg2))
    ;;;;;;;;
-   (foreach
-    rdd
-    (fn [x]
-      (log/info (str "*********" x "*****" ))))
+         (foreach
+          rdd
+          (sfn/fn [x]
+            (log/info (str "*********" x "*****" ))))
    ;;;;;;;
-   ))
-
-(.start streaming-context)
-(.awaitTermination streaming-context)
+         ))
+      (.start streaming-context)
+      (.awaitTermination streaming-context))))
