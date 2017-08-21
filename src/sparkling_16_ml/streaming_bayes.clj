@@ -5,6 +5,8 @@
    [sparkling.conf :as conf]
    [sparkling.core :as spark]
    [sparkling.api :as api]
+   [flambo.api :as fapi]
+   [flambo.streaming :as fstreaming]
    ;;[sparkling.function :refer [function2 function]]
    [sparkling.function :refer [flat-map-function
                                flat-map-function2
@@ -74,10 +76,17 @@
        (fn [rdd arg2]
          (log/info (str "=====" rdd "=====" arg2))
    ;;;;;;;;
-         (foreach
+         #_(foreach
           rdd
           (sfn/fn [x]
             (log/info (str "*********" x "*****" ))))
+    (fstreaming/foreach-rdd
+     stream
+     (fn [rdd arg2]
+       (log/info (str "=====" rdd "=====" arg2))
+       (fapi/foreach
+        rdd (fapi/fn [x]
+              (log/info (str "*********" x "*****" ))))))
    ;;;;;;;
          ))
       (.start streaming-context)
