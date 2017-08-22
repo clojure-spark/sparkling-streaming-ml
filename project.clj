@@ -5,7 +5,6 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [gorillalabs/sparkling "1.2.3"]
-                 [yieldbot/flambo "0.8.2"]
                  [org.apache.spark/spark-mllib_2.10 "1.6.0"]
                  [org.apache.spark/spark-streaming_2.10 "1.6.0"]
                  [org.apache.spark/spark-streaming-kafka_2.10 "1.6.3"]

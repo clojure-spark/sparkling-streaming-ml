@@ -5,7 +5,6 @@
    [sparkling.conf :as conf]
    [sparkling.core :as spark]
    [sparkling.api :as api]
-   [flambo.api :as fapi]
    [sparkling.function :refer [function2]]
    [sparkling.scalaInterop :as scala]
    [clojure.tools.logging :as log])
@@ -27,21 +26,21 @@
 
 (defn -main
   [& args]
-  (let [c (-> (conf/spark-conf)
-              (conf/master "local[*]")
-              (conf/app-name "Consumer"))
-        context (JavaSparkContext. c)
-        streaming-context (JavaStreamingContext. context (Duration. 1000))
-        parameters (HashMap. {"metadata.broker.list" "127.0.0.1:9092"})
-        topics (Collections/singleton "w4u_messages")
-        stream (KafkaUtils/createDirectStream streaming-context String String StringDecoder StringDecoder parameters topics)]
-    (do
-      (foreach-rdd
-       stream
-       (fn [rdd arg2]
-         (log/info (str "=====" rdd "=====" arg2))
-         (fapi/foreach
-          rdd (fapi/fn [x]
-                (log/info (str "*********" x "*****" ))))))
-      (.start streaming-context)
-      (.awaitTermination streaming-context))))
+  (spark/with-context context
+    (-> (conf/spark-conf)
+        (conf/master "local[*]")
+        (conf/app-name "Consumer"))
+    (let [streaming-context (JavaStreamingContext. context (Duration. 1000))
+          parameters (HashMap. {"metadata.broker.list" "127.0.0.1:9092"})
+          topics (Collections/singleton "w4u_messages")
+          stream (KafkaUtils/createDirectStream streaming-context String String StringDecoder StringDecoder parameters topics)]
+      (do
+        (foreach-rdd
+         stream
+         (fn [rdd arg2]
+           (log/info (str "=====" rdd "=====" arg2))
+           (spark/foreach
+            (fn [x]
+              (log/info (str "*********" x "*****" ))) rdd)))
+        (.start streaming-context)
+        (.awaitTermination streaming-context)))))
