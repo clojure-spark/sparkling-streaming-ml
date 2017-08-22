@@ -12,6 +12,9 @@
    (org.apache.spark.api.java JavaRDD)
    (sparkinterface VectorClojure)
    (org.apache.spark.mllib.linalg Vectors)
+   (org.apache.spark.mllib.feature HashingTF)
+   (org.apache.spark.mllib.classification NaiveBayes)
+   (org.apache.spark.mllib.regression LabeledPoint)
    (org.apache.spark.streaming Duration)
    (org.apache.spark.api.java JavaSparkContext)
    (org.apache.spark.streaming.api.java JavaStreamingContext JavaDStream)
@@ -33,12 +36,26 @@
     (let [streaming-context (JavaStreamingContext. context (Duration. 1000))
           parameters (HashMap. {"metadata.broker.list" "127.0.0.1:9092"})
           topics (Collections/singleton "w4u_messages")
-          stream (KafkaUtils/createDirectStream streaming-context String String StringDecoder StringDecoder parameters topics)]
+          stream (KafkaUtils/createDirectStream
+                  streaming-context String String StringDecoder StringDecoder parameters topics)
+          ;; 加载贝叶斯模型
+          spam (spark/text-file context "files/spam.txt")
+          ham (spark/text-file context "files/ham.txt")
+          tf (HashingTF. 100)
+          spam-features (spark/map (fn [x] (VectorClojure/tftransform tf x)) spam)
+          ham-features (spark/map (fn [x] (VectorClojure/tftransform tf x)) ham)
+          positive-examples (spark/map (fn [x] (VectorClojure/labeledPoint 0 (.values x))) spam-features)
+          negative-examples (spark/map (fn [x] (VectorClojure/labeledPoint 0 (.values x))) ham-features)
+          pnum (.count positive-examples)
+          ]
       (do
         (foreach-rdd
          stream
          (fn [rdd arg2]
            (log/info (str "=====" rdd "=====" arg2))
+           ;; ;;
+           (log/info (str "-----" pnum))
+           ;; ;;
            (spark/foreach
             (fn [x]
               (log/info (str "*********" x "*****" ))) rdd)))
