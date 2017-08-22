@@ -13,6 +13,7 @@
    (sparkinterface VectorClojure)
    (org.apache.spark.mllib.linalg Vectors)
    (org.apache.spark.mllib.feature HashingTF)
+   ;; (com.github.fommil.netlib NativeRefBLAS)
    (org.apache.spark.mllib.classification NaiveBayes)
    (org.apache.spark.mllib.regression LabeledPoint)
    (org.apache.spark.streaming Duration)
@@ -46,7 +47,9 @@
           ham-features (spark/map (fn [x] (VectorClojure/tftransform tf x)) ham)
           positive-examples (spark/map (fn [x] (VectorClojure/labeledPoint 0 (.values x))) spam-features)
           negative-examples (spark/map (fn [x] (VectorClojure/labeledPoint 0 (.values x))) ham-features)
-          pnum (.count positive-examples)
+          training-data (spark/union (.rdd positive-examples) (.rdd negative-examples))
+          ;;model (NaiveBayes/train training-data 1.0)
+          eg1 (VectorClojure/tftransform tf "Dear Spark Learner, Thanks so much for attending the Spark Summit 2014!...")
           ]
       (do
         (foreach-rdd
@@ -54,7 +57,8 @@
          (fn [rdd arg2]
            (log/info (str "=====" rdd "=====" arg2))
            ;; ;;
-           (log/info (str "-----" pnum))
+           (log/info (str "~~~~~~" (.count training-data)))
+           ;;(log/info (str "------" (.predict model eg1)))
            ;; ;;
            (spark/foreach
             (fn [x]
