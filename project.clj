@@ -9,9 +9,7 @@
                  [org.apache.spark/spark-mllib_2.10 "1.6.0"]
                  [org.apache.spark/spark-streaming_2.10 "1.6.0"]
                  [org.apache.spark/spark-streaming-kafka_2.10 "1.6.3"]
-                 [org.apache.spark/spark-streaming-flume_2.10 "1.6.1"]
-                 [yieldbot/serializable-fn "0.1.2"
-                  :exclusions [com.twitter/chill-java]]]
+                 [org.apache.spark/spark-streaming-flume_2.10 "1.6.1"]]
   :aot [#".*" sparkling.serialization sparkling.destructuring sparkling-16-ml.core]
   :main sparkling-16-ml.streaming-bayes
   :profiles {:provided {:dependencies [[org.apache.spark/spark-core_2.10 "1.6.0"]]}
