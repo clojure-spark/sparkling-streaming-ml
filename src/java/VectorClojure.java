@@ -17,6 +17,11 @@ public class VectorClojure {
         return denseVec;
     }
 
+    public static LabeledPoint labeledPoint(double label, double [] args) {
+        LabeledPoint point = new LabeledPoint(label, Vectors.dense(args));
+        return point;
+    }
+    
     public static StreamingLinearRegressionWithSGD linearRegressionodel(double [] args, int num, float size) {
         StreamingLinearRegressionWithSGD model = new StreamingLinearRegressionWithSGD()
             .setStepSize(size)

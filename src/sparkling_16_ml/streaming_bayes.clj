@@ -25,9 +25,7 @@
    (java.util Collections)
    (java.util HashMap)))
 
-(def rdd-log (atom (list)))
 (def sc-log (atom ""))
-(def predict-log (atom ""))
 (defn foreach-rdd [dstream f]
   (.foreachRDD dstream (function2 f)))
 
@@ -63,25 +61,11 @@
         (foreach-rdd
          stream
          (fn [rdd arg2]
-           (log/info (str "=====" rdd "=====" arg2 "====="
+           (log/info (str "=====" rdd "=====" arg2 "\n"
                           (reset! sc-log context)
-                          (reset! predict-log predict)
-                          "======="
-                          ;; =[(null,啊啊啊啊)] or []
-                          ;; [#sparkling/tuple [nil "哎哎哎"]]
+                          "\n"
                           (let [res (last (vec (.toArray (spark/collect rdd))))]
-                            ;; class scala.Tuple2 ==>> (type res)
-                            ;;(str "_____" (type res) "_____" (nil? res))
-                            (if (nil? res) "_____" (predict (last (untuple res))))
-                            )
-                          ;;(swap! rdd-log conj rdd)
-                          ))
-           
-           #_(spark/foreach
-            (fn [x]
-              (log/info (str "*****" x "*****"))) rdd)
-           ))
+                            (if (nil? res) "消息为空" (str "消息'" (last (untuple res)) "'的预测结果是:"
+                                                           (predict (last (untuple res))))))))))
         (.start streaming-context)
         (.awaitTermination streaming-context)))))
-
-;;(spark/collect (nth @rdd-log 5))
