@@ -9,6 +9,7 @@
    [sparkling.scalaInterop :as scala]
    [clojure.tools.logging :as log])
   (:import
+   (scala Tuple2)
    (org.apache.spark.api.java JavaRDD)
    (sparkinterface VectorClojure)
    (org.apache.spark.mllib.linalg Vectors)
@@ -24,10 +25,17 @@
    (java.util Collections)
    (java.util HashMap)))
 
+(def rdd-log (atom (list)))
 (def sc-log (atom ""))
 (def predict-log (atom ""))
 (defn foreach-rdd [dstream f]
   (.foreachRDD dstream (function2 f)))
+
+(defn untuple [^Tuple2 t]
+  (persistent!
+   (conj!
+    (conj! (transient []) (._1 t))
+    (._2 t))))
 
 (defn -main
   [& args]
@@ -57,9 +65,23 @@
          (fn [rdd arg2]
            (log/info (str "=====" rdd "=====" arg2 "====="
                           (reset! sc-log context)
-                          (reset! predict-log predict)))
-           (spark/foreach
+                          (reset! predict-log predict)
+                          "======="
+                          ;; =[(null,啊啊啊啊)] or []
+                          ;; [#sparkling/tuple [nil "哎哎哎"]]
+                          (let [res (last (vec (.toArray (spark/collect rdd))))]
+                            ;; class scala.Tuple2 ==>> (type res)
+                            ;;(str "_____" (type res) "_____" (nil? res))
+                            (if (nil? res) "_____" (predict (last (untuple res))))
+                            )
+                          ;;(swap! rdd-log conj rdd)
+                          ))
+           
+           #_(spark/foreach
             (fn [x]
-              (log/info (str "*****" x "*****"))) rdd)))
+              (log/info (str "*****" x "*****"))) rdd)
+           ))
         (.start streaming-context)
         (.awaitTermination streaming-context)))))
+
+;;(spark/collect (nth @rdd-log 5))
