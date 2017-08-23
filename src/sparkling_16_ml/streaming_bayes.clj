@@ -25,7 +25,7 @@
    (java.util HashMap)))
 
 (def sc-log (atom ""))
-
+(def predict-log (atom ""))
 (defn foreach-rdd [dstream f]
   (.foreachRDD dstream (function2 f)))
 
@@ -40,30 +40,26 @@
           topics (Collections/singleton "w4u_messages")
           stream (KafkaUtils/createDirectStream
                   streaming-context String String StringDecoder StringDecoder parameters topics)
-          ;; 加载贝叶斯模型
+          ;; 加载贝叶斯模型, 用于数据流的预测分类
           spam (spark/text-file context "files/spam.txt")
           ham (spark/text-file context "files/ham.txt")
           tf (HashingTF. 100)
           spam-features (spark/map (fn [x] (VectorClojure/tftransform tf x)) spam)
           ham-features (spark/map (fn [x] (VectorClojure/tftransform tf x)) ham)
-          positive-examples (spark/map (fn [x] (VectorClojure/labeledPoint 0 (.values x))) spam-features)
-          negative-examples (spark/map (fn [x] (VectorClojure/labeledPoint 0 (.values x))) ham-features)
+          positive-examples (spark/map (fn [x] (LabeledPoint. 1 x)) spam-features)
+          negative-examples (spark/map (fn [x] (LabeledPoint. 0 x)) ham-features)
           training-data (spark/union (.rdd positive-examples) (.rdd negative-examples))
-          ;;model (NaiveBayes/train training-data 1.0)
-          eg1 (VectorClojure/tftransform tf "Dear Spark Learner, Thanks so much for attending the Spark Summit 2014!...")
-          ]
+          model (NaiveBayes/train training-data 1.0)
+          predict (fn [x] (.predict model (VectorClojure/tftransform tf x)))]
       (do
         (foreach-rdd
          stream
          (fn [rdd arg2]
-           (reset! sc-log context)
-           (log/info (str "=====" rdd "=====" arg2))
-           ;; ;;
-           (log/info (str "~~~~~~" (.count training-data)))
-           ;;(log/info (str "------" (.predict model eg1)))
-           ;; ;;
+           (log/info (str "=====" rdd "=====" arg2 "====="
+                          (reset! sc-log context)
+                          (reset! predict-log predict)))
            (spark/foreach
             (fn [x]
-              (log/info (str "*********" x "*****" ))) rdd)))
+              (log/info (str "*****" x "*****"))) rdd)))
         (.start streaming-context)
         (.awaitTermination streaming-context)))))
