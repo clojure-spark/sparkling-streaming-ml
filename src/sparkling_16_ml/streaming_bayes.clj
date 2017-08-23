@@ -13,7 +13,6 @@
    (sparkinterface VectorClojure)
    (org.apache.spark.mllib.linalg Vectors)
    (org.apache.spark.mllib.feature HashingTF)
-   ;; (com.github.fommil.netlib NativeRefBLAS)
    (org.apache.spark.mllib.classification NaiveBayes)
    (org.apache.spark.mllib.regression LabeledPoint)
    (org.apache.spark.streaming Duration)
@@ -24,6 +23,8 @@
    (org.apache.spark.streaming.kafka KafkaUtils)
    (java.util Collections)
    (java.util HashMap)))
+
+(def sc-log (atom ""))
 
 (defn foreach-rdd [dstream f]
   (.foreachRDD dstream (function2 f)))
@@ -55,6 +56,7 @@
         (foreach-rdd
          stream
          (fn [rdd arg2]
+           (reset! sc-log context)
            (log/info (str "=====" rdd "=====" arg2))
            ;; ;;
            (log/info (str "~~~~~~" (.count training-data)))
