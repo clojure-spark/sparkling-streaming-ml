@@ -1,4 +1,4 @@
-# Clojure实现在线学习Spark Steaming回归分析, 贝叶斯
+# Clojure实现在线学习Spark Steaming回归分析&贝叶斯, 以及其他机器学习
 
 ## sparkling-16-ml (Sparkling 1.2.3 + Spark 2.10 ~ 1.6.0 => 可以很好支持Spark1.6.0, 因为Spark最新版2.2.0对Java的支持不友好, 以及更好的支持中文阅读 《ML with Spark》)
 
