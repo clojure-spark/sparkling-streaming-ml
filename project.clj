@@ -12,7 +12,7 @@
                  [yieldbot/serializable-fn "0.1.2"
                   :exclusions [com.twitter/chill-java]]]
   :aot [#".*" sparkling.serialization sparkling.destructuring sparkling-16-ml.core]
-  :main sparkling-16-ml.streaming-bayes
+  :main sparkling-16-ml.matrix
   :profiles {:provided {:dependencies [[org.apache.spark/spark-core_2.10 "1.6.0"]]}
              :dev {:plugins [[lein-dotenv "RELEASE"]]}}
   :java-source-paths ["src/java"])
